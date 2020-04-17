@@ -54,6 +54,9 @@ QString FileAppender::fileName() const
  */
 void FileAppender::setFileName(const QString& s)
 {
+  if (s.isEmpty())
+    std::cerr << "<FileAppender::FileAppender> File name is empty. The appender will do nothing" << std::endl;
+
   QMutexLocker locker(&m_logFileMutex);
   if (m_logFile.isOpen())
     m_logFile.close();
@@ -62,8 +65,18 @@ void FileAppender::setFileName(const QString& s)
 }
 
 
+bool FileAppender::reopenFile()
+{
+  closeFile();
+  return openFile();
+}
+
+
 bool FileAppender::openFile()
 {
+  if (m_logFile.fileName().isEmpty())
+    return false;
+
   bool isOpen = m_logFile.isOpen();
   if (!isOpen)
   {
